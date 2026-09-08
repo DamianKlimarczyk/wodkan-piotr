@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#3d4f7a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Piotr D2" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>WOD-KAN · Piotr · 9.09</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="icon" href="icon-192.png" />
+<style>
+  :root {
+    --ink: #161513;
+    --muted: #5c574e;
+    --line: #d9d4c8;
+    --paper: #f4f0e6;
+    --card: #fffdf8;
+    --a: #1f5c45;
+    --b: #2c4a6e;
+    --piotr: #3d4f7a;
+    --skip: #6b6560;
+    --pad: max(16px, env(safe-area-inset-left));
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.35;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+  a { color: inherit; }
+  header {
+    position: sticky; top: 0; z-index: 8;
+    background: var(--paper);
+    padding: calc(10px + env(safe-area-inset-top)) var(--pad) 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 { font-size: 15px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  header h1 span { color: var(--muted); font-weight: 500; }
+  #q {
+    width: 100%; font-size: 16px; border: 1px solid var(--line);
+    background: var(--card); padding: 10px 12px; border-radius: 10px;
+  }
+  .chips { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .chip {
+    flex: 0 0 auto; border: 1px solid var(--line); background: var(--card);
+    font: inherit; font-size: 13px; font-weight: 650; padding: 7px 10px; border-radius: 999px;
+  }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  main { padding: 12px var(--pad) 24px; }
+  .person, .firm, .box {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px; margin: 0 0 10px;
+  }
+  .who { font-weight: 750; }
+  .st { color: var(--muted); font-size: 12px; margin: 4px 0 6px; }
+  .pri {
+    display: inline-block; font-size: 11px; font-weight: 750;
+    padding: 2px 6px; margin-right: 6px; border: 1px solid var(--ink);
+    border-radius: 4px; vertical-align: middle;
+  }
+  .pri.MUST, .pri.must { background: var(--piotr); color: #fff; border-color: var(--piotr); }
+  .pri.A, .pri.trafienie { background: var(--a); color: #fff; border-color: var(--a); }
+  .pri.B { background: var(--b); color: #fff; border-color: var(--b); }
+  .pri.SKIP { background: #eee; color: var(--skip); border-color: var(--line); }
+  .firm { padding: 0; overflow: hidden; }
+  .firm.must-card { border-color: var(--piotr); border-width: 2px; }
+  .firm > summary.head {
+    display: flex; gap: 10px; align-items: flex-start;
+    list-style: none; cursor: pointer; padding: 12px;
+  }
+  .firm > summary.head::-webkit-details-marker { display: none; }
+  .firm > summary.head::marker { content: ""; }
+  .tick {
+    flex: 0 0 22px; width: 22px; height: 22px; margin-top: 1px;
+    border: 2px solid var(--line); border-radius: 6px; background: #fff;
+  }
+  .firm.done .tick { background: var(--piotr); border-color: var(--piotr); }
+  .firm.done summary h3 { text-decoration: line-through; opacity: .55; }
+  .body { font-size: 14px; padding: 0 12px 12px; border-top: 1px solid var(--line); }
+  .body .ks { padding-top: 10px; }
+  .body p { margin: 0 0 8px; }
+  .body p:last-child { margin: 0; }
+  h3 { margin: 0 0 2px; font-size: 16px; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 8px; }
+  .nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 9;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    background: #fff; border-top: 4px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav[data-who="jutro"] { border-top-color: var(--piotr); }
+  .nav[data-who="serwis"] { border-top-color: var(--a); }
+  .nav[data-who="reszta"] { border-top-color: var(--b); }
+  .nav[data-who="start"] { border-top-color: var(--ink); }
+  .nav button {
+    appearance: none; border: 0; background: transparent; font: inherit;
+    font-size: 11px; font-weight: 750; padding: 10px 4px 8px; color: var(--muted);
+  }
+  .nav button.on { color: #fff; }
+  .nav button.on[data-tab="jutro"] { background: var(--piotr); }
+  .nav button.on[data-tab="serwis"] { background: var(--a); }
+  .nav button.on[data-tab="reszta"] { background: var(--b); }
+  .nav button.on[data-tab="start"] { background: var(--ink); }
+  .nav .dot { display: block; font-size: 15px; line-height: 1.15; }
+  .hidden { display: none; }
+  .box p { margin: 0 0 8px; font-size: 14px; }
+  .box p:last-child { margin: 0; }
+  .box h2 { margin-top: 0; }
+  .box ol, .box ul { margin: 0 0 8px; padding-left: 18px; font-size: 14px; }
+  .box ol:last-child, .box ul:last-child { margin: 0; }
+  .box li { margin: 0 0 6px; }
+  .qq { font-style: italic; }
+  .install {
+    background: #efe8d8; border-radius: 12px; padding: 12px; margin: 0 0 12px; font-size: 14px;
+  }
+  .cel {
+    background: var(--piotr); color: #fff; border-radius: 12px; padding: 14px; margin: 0 0 12px;
+  }
+  .cel .lbl {
+    display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    font-weight: 750; opacity: .85; margin-bottom: 6px;
+  }
+  .cel p { margin: 0; font-size: 15px; font-weight: 650; line-height: 1.4; }
+  .empty { color: var(--muted); padding: 24px 8px; text-align: center; }
+  details.hint { margin: 0 0 10px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; }
+  details.hint > summary {
+    font-size: 14px; font-weight: 750; padding: 12px 0; cursor: pointer; list-style: none;
+  }
+  details.hint > summary::-webkit-details-marker { display: none; }
+  details.hint > summary::marker { content: ""; }
+  details.hint > summary::before { content: "▸ "; color: var(--muted); }
+  details.hint[open] > summary::before { content: "▾ "; }
+  details.hint .inner { padding: 0 0 12px; font-size: 14px; }
+  details.hint .inner p { margin: 0 0 8px; }
+  details.hint .inner p:last-child { margin: 0; }
+  .map-card { margin: 0 0 10px; }
+  .map-open {
+    display: block; width: 100%; padding: 0; border: 0; background: transparent;
+    text-align: left; font: inherit; color: inherit; cursor: zoom-in;
+  }
+  .map-open img {
+    display: block; width: 100%; height: 168px; object-fit: cover; object-position: top;
+    border-radius: 8px; border: 1px solid var(--line); background: #fff;
+  }
+  .map-open .st { margin: 6px 0 0; }
+  .map-dl {
+    display: inline-block; margin-top: 8px; font-size: 13px; font-weight: 750;
+    padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--card);
+  }
+  .mapbox {
+    position: fixed; inset: 0; z-index: 40; background: #111; color: #fff;
+    display: flex; flex-direction: column;
+  }
+  .mapbox.hidden { display: none; }
+  .mapbox-bar {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 8px;
+    padding: calc(8px + env(safe-area-inset-top)) 10px 8px;
+  }
+  .mapbox-bar strong { flex: 1; font-size: 13px; }
+  .mapbox-bar button {
+    appearance: none; border: 0; background: #2a2a2a; color: #fff;
+    font: inherit; font-size: 14px; font-weight: 750;
+    padding: 8px 10px; border-radius: 8px;
+  }
+  .mapbox-scroller {
+    flex: 1; overflow: auto; -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y pinch-zoom;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mapbox-scroller img { display: block; width: 220%; max-width: none; }
+  .person p { margin: 0; font-size: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>WOD-KAN 9.09 · Piotr <span id="hdr"></span></h1>
+  <input id="q" type="search" placeholder="Szukaj firmy, hali, osoby…" enterkeyhint="search" />
+  <div class="chips" id="chips"></div>
+</header>
+<main id="main"></main>
+<nav class="nav" id="nav">
+  <button type="button" data-tab="start"><span class="dot">Start</span>briefing</button>
+  <button type="button" data-tab="jutro"><span class="dot">Jutro</span>Hala C</button>
+  <button type="button" data-tab="serwis"><span class="dot">Serwis</span>ludzie</button>
+  <button type="button" data-tab="reszta"><span class="dot">Reszta</span>D + Heat</button>
+</nav>
+<div id="mapbox" class="mapbox hidden">
+  <div class="mapbox-bar">
+    <strong id="mapbox-title">Mapa</strong>
+    <button type="button" id="mapbox-out">−</button>
+    <button type="button" id="mapbox-in">+</button>
+    <button type="button" id="mapbox-close">Zamknij</button>
+  </div>
+  <div class="mapbox-scroller" id="mapbox-scroller">
+    <img id="mapbox-img" alt="Mapa hali" />
+  </div>
+</div>
+<script>
+const DATA = {"jutro": [{"tier": "MUST", "firma": "EkoWodrol", "stoisko": "Hala C D63", "kat": "Wykonawstwo sieci", "miasto": "Koszalin", "www": "https://ekowodrol.pl/", "coRobi": "Wykonawstwo wod-kan od 65 lat: inwestycja od projektu do efektu.", "teren": "Brygady na budowie sieci i obiektów: dziennik, odbiory, protokoły.", "klienci": "Gminy i MPWiK na Pomorzu Środkowym i dalej — inwestycje komunalne.", "skala": "SMB", "kolejka": 1, "why": "Adam: jutro na stoisku Artur Piekutowski, odpowiedzialny za serwis. Pytaj po imieniu.", "opener": "Szukam Artura Piekutowskiego — słyszałem, że spinacie serwis. Macie własne ekipy, które wracają z obiektu z protokołem, czy to głównie montaż na budowie i koniec?", "kontakty": [{"pri": "must", "firma": "EkoWodrol", "stoisko": "Hala C D63", "osoba": "Artur Piekutowski", "rola": "odpowiedzialny za serwis (Adam, D1)", "linkedin": "", "tel": "", "mail": "", "note": "Jutro ma być na stoisku. Brak publicznego LinkedIn — pytaj po imieniu."}]}, {"tier": "A", "firma": "Kraft Pro", "stoisko": "Hala C F12", "kat": "Montaż i serwis technologii", "miasto": "Gdańsk", "www": "https://technicalia.com.pl/", "coRobi": "Inżynieria odorów i gospodarki ściekowej — wejście na obiekty.", "teren": "Inżynierowie / serwis na oczyszczalniach: pomiary, montaż, regulacja deodoryzacji.", "klienci": "Oczyszczalnie, przepompownie, obiekty z problemem odorów.", "skala": "SMB", "kolejka": 2, "why": "Adam nie zdążył. Inżynierowie / serwis na oczyszczalniach.", "opener": "Jak u Was wraca info z obiektu — pomiar, montaż, regulacja — kartka, WhatsApp, czy od razu do biura?", "kontakty": []}, {"tier": "A", "firma": "Drillex", "stoisko": "Hala C e34", "kat": "Wykonawstwo sieci", "miasto": "Czerśl", "www": "https://drillex.pl/", "coRobi": "Drillex Maciej Kur (JDG, Czerśl) — przewierty sterowane HDD oraz dystrybucja narzędzi do HDD.", "teren": "Ekipy HDD: przecisk pod drogą / rzeką; część terenu to też klienci-wykonawcy kupujący narzędzia.", "klienci": "Inwestorzy sieci (wod-kan, energia, telco) i inne firmy HDD.", "skala": "Mikro", "kolejka": 3, "why": "Adam nie zdążył. Ekipy HDD. Uważaj: część to sprzedaż narzędzi, nie własny serwis.", "opener": "Wasze ekipy HDD jeżdżą na przecisk i wracają z raportem z maszyny — czy to u Was, czy u klientów-wykonawców?", "kontakty": []}, {"tier": "A", "firma": "Eko-Kompleks", "stoisko": "Hala C E49", "kat": "Wykonawstwo sieci", "miasto": "Rzgów", "www": "https://ekokompleks.com.pl/", "coRobi": "Inżynieria środowiska: dokumentacja i inwestycje sieci oraz obiektów.", "teren": "Kierownicy budów i ekipy: realizacja inwestycji wod-kan od projektu do odbioru.", "klienci": "Gminy i inwestorzy publiczni — sieci i obiekty ochrony środowiska.", "skala": "SMB", "kolejka": 4, "why": "Adam nie zdążył. Inwestycje wod-kan. Adam: dużo firm to projekt+montaż bez serwisu — dopytaj wprost.", "opener": "Po odbiorze inwestycji macie jeszcze serwis / utrzymanie, czy ekipa ładuje taczkę, składa i znika?", "kontakty": []}, {"tier": "A", "firma": "Mido", "stoisko": "Hala C E66", "kat": "Wykonawstwo sieci", "miasto": "Czaple", "www": "https://mido.net.pl/", "coRobi": "Budowa i renowacja infrastruktury; wiertnica grawitacyjna.", "teren": "Ekipy bezwykopowe / wiertnicze: odcinek, dziennik z maszyny, odbiór.", "klienci": "Gminy i MPWiK z trudnymi odcinkami sieci do bezwykopu.", "skala": "SMB", "kolejka": 5, "why": "Adam nie zdążył. Bezwykop / wiertnica. Dziennik z maszyny.", "opener": "Jak z maszyny schodzi dziennik odcinka — kto to spina po powrocie do biura?", "kontakty": []}, {"tier": "A", "firma": "Smart Meters Solutions", "stoisko": "Hala C F48", "kat": "Pomiary / diagnostyka", "miasto": "Łódź", "www": "https://smart-meters.com.pl/", "coRobi": "Dobór, montaż i odczyt wodomierzy oraz ciepłomierzy.", "teren": "Monterzy i inkasenci: wymiana / montaż licznika w mieszkaniu lub na sieci, odczyt.", "klienci": "Wspólnoty, spółdzielnie, zarządcy, wodociągi — opomiarowanie mediów.", "skala": "SMB", "kolejka": 6, "why": "Adam nie zdążył. Monterzy i inkasenci w mieszkaniach / na sieci.", "opener": "Monterzy i odczyty — jak wraca status wymiany licznika z klatki? Tablet, kartka, czy telefon do biura?", "kontakty": []}, {"tier": "SKIP", "firma": "Świat Instalacji", "stoisko": "Hala C F98", "kat": "Renowacja / inspekcja / czyszczenie", "miasto": "Łódź", "www": "https://swiatinstalacji.eu/", "coRobi": "Łukasz Anuszczyk Świat Instalacji (JDG, Łódź) — wykonawstwo, diagnostyka, CIPP i sprzedaż technologii wod-kan.", "teren": "Ekipy wykonawcze / CIPP: diagnostyka instalacji, renowacja, wdrożenie u klienta.", "klienci": "Gminy, wykonawcy i operatorzy sieci — usługi + technologia.", "skala": "Mikro", "kolejka": 7, "why": "Adam: moim zdaniem nie ma co podchodzić. Tylko jeśli reszta pusta.", "opener": "Macie własne ekipy CIPP, czy to głównie sprzedaż technologii?", "kontakty": []}], "serwis": [{"pri": "trafienie", "firma": "Hawle Polska", "stoisko": "Hala C D81", "osoba": "Radosław Szeinig", "rola": "Kierownik Działu Technicznego i Serwisu", "linkedin": "https://www.linkedin.com/in/radosław-szeinig-3ab75b14", "tel": "+48 785 011 363", "mail": "radoslaw.szeinig@hawle.pl", "note": "Ekipy na czynnej sieci wod-kan w całej PL. Najczystszy hit."}, {"pri": "trafienie", "firma": "Hawle Polska", "stoisko": "Hala C D81", "osoba": "Jarosław Chmielewski", "rola": "Menedżer Działu Serwisu", "linkedin": "", "tel": "+48 609 550 550", "mail": "jaroslaw.chmielewski@hawle.pl", "note": "Ten sam stoisko co Szeinig."}, {"pri": "trafienie", "firma": "KanRo Ltd", "stoisko": "Hala C E42 / stz-1", "osoba": "Jarosław Kotowski", "rola": "Kierownik Działu Serwisu (KAISER)", "linkedin": "", "tel": "+48 662 037 703", "mail": "j.kotowski@kanro.pl", "note": "Serwis wozów. NIE mylić z Kotowskim z gier."}, {"pri": "trafienie", "firma": "KanRo Ltd", "stoisko": "Hala C E42 / stz-1", "osoba": "Łukasz Pieśniak", "rola": "Wicedyrektor Serwisu (KAISER / MORO)", "linkedin": "", "tel": "+48 739 034 530", "mail": "l.piesniak@kanro.pl", "note": "Oddział Będzin."}, {"pri": "trafienie", "firma": "EBARA Pompy Polska", "stoisko": "Hala C E32", "osoba": "Sebastian Krawiec", "rola": "Service and Production Manager", "linkedin": "https://www.linkedin.com/in/sebastian-krawiec-2b187ba7", "tel": "", "mail": "", "note": "Od 2011 w EBARA."}, {"pri": "trafienie", "firma": "DAB Pumps Poland", "stoisko": "Hala C D111", "osoba": "Piotr Jaslarz", "rola": "Technical Sales Manager / Service Manager", "linkedin": "https://www.linkedin.com/in/piotr-jaslarz-93125456", "tel": "", "mail": "", "note": "Wcześniej serwis Pompax i Grundfos."}, {"pri": "trafienie", "firma": "Endress+Hauser Polska", "stoisko": "Hala C F88 / Stz05", "osoba": "Damian Terech", "rola": "Kierownik serwisu", "linkedin": "https://www.linkedin.com/in/damian-terech-a804461a7", "tel": "", "mail": "", "note": "Serwis przyrządów + wzorcowanie."}, {"pri": "trafienie", "firma": "ARNAP", "stoisko": "Hala C E75", "osoba": "Marcin Puskarczyk", "rola": "Technical Manager (serwis zaworów)", "linkedin": "https://www.linkedin.com/in/marcin-puskarczyk-7b3a6340", "tel": "", "mail": "", "note": "Commissioning + service management."}, {"pri": "trafienie", "firma": "Ecol-Unicon", "stoisko": "Hala C F58", "osoba": "Radosław Sendak", "rola": "Menadżer ds. usług serwisowych", "linkedin": "https://www.linkedin.com/in/radosław-sendak-0979471b5", "tel": "", "mail": "", "note": "Ecol-Serwis. Łódź."}, {"pri": "must", "firma": "EkoWodrol", "stoisko": "Hala C D63", "osoba": "Artur Piekutowski", "rola": "odpowiedzialny za serwis (Adam, D1)", "linkedin": "", "tel": "", "mail": "", "note": "Jutro ma być na stoisku. Brak publicznego LinkedIn — pytaj po imieniu."}], "reszta": [{"tier": "A", "firma": "GSG Industria / GSG Serwis", "stoisko": "Hala D B18 / Hala D Stz3", "kat": "Wykonawstwo sieci", "miasto": "Szczecin", "www": "https://www.gsgindustria.pl", "coRobi": "Projekt, budowa, renowacja i utrzymanie infrastruktury wod-kan.", "teren": "Brygady budowy i ekipy utrzymania sieci: roboty, awarie, przeglądy.", "klienci": "Gminy i MPWiK — zarówno nowe inwestycje, jak i utrzymanie sieci.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Tukany", "stoisko": "Hala D B54", "kat": "Renowacja / inspekcja / czyszczenie", "miasto": "Jelenia Góra", "www": "https://tukany.pl/", "coRobi": "Wyłącznie czyszczenie i diagnostyka rurociągów DN80–DN1200.", "teren": "Ekipy ciśnieniowe: czyszczenie rurociągu, diagnostyka, protokół z odcinka.", "klienci": "Przemysł i operatorzy sieci z rurociągami do czyszczenia (nie tylko komunalne).", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "PGS Polska Grupa Serwisowa", "stoisko": "Hala D D63", "kat": "Montaż i serwis technologii", "miasto": "Warszawa", "www": "https://pgs-service.com/", "coRobi": "Serwis wirówek, dekanterów i homogenizatorów (pgs-service.com). Nie mylić z wózkami Grupa PGS. ~200 maszyn w PL i krajach bałtyckich.", "teren": "Serwisanci: wyjazd do zakładu albo remont w warsztacie, protokół, części, regeneracja bębnów.", "klienci": "Zakłady przemysłowe i oczyszczalnie z wirówkami / dekanterami (osady, produkcja).", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Hydro-Partner", "stoisko": "Hala D D63", "kat": "Wykonawstwo sieci", "miasto": "Leszno", "www": "https://hydro-partner.pl/", "coRobi": "Produkcja/handel plus wykonawstwo inwestycji wod-kan i środowiska.", "teren": "Jeśli robią inwestycje: ekipy na budowie; część to dostawy bez własnej brygady.", "klienci": "Gminy i inwestorzy gospodarki wodnej — mieszanka dostaw i robót.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Unimark", "stoisko": "Hala D D72", "kat": "Montaż i serwis technologii", "miasto": "Wadowice", "www": "https://unimark.pl/", "coRobi": "Serwis i remonty maszyn / urządzeń w całej Polsce.", "teren": "Ekipy serwisowo-remontowe jeżdżą po kraju na zlecenia i wracają z raportem.", "klienci": "Zakłady i operatorzy z maszynami wymagającymi serwisu w terenie.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Sanit-Serwis", "stoisko": "Hala D D74", "kat": "Wykonawstwo sieci", "miasto": "Gliwice", "www": "https://sanit-serwis.com/", "coRobi": "Realizacja sieci sanitarnych (także bezwykop) i wsparcie innych wykonawców.", "teren": "Ekipy kładące sieci wod/kan/gaz albo serwis sprzętu dla innych brygad.", "klienci": "Inwestorzy sieci oraz inni wykonawcy wod-kan-gaz.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Drotex", "stoisko": "Hala D B84a", "kat": "Montaż i serwis technologii", "miasto": "Warszawa", "www": "https://drotex.eu", "coRobi": "Sprzedaż, instalowanie i serwis maszyn do ujęć i oczyszczania wody/ścieków.", "teren": "Ekipy montażu i serwisu maszyn na ujęciach i oczyszczalniach.", "klienci": "Oczyszczalnie, ujęcia wody, zakłady komunalne i przemysł.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "B", "firma": "Hydro-Vacuum S.A.", "stoisko": "Hala D B42", "kat": "Producent z serwisem", "miasto": "Grudziądz", "www": "https://www.hydro-vacuum.com.pl/", "coRobi": "Producent pomp i systemów pompowych od 1862, z serwisem.", "teren": "Serwisanci i ekipy uruchomieniowe na pompowniach klientów.", "klienci": "Wodociągi, ścieki, przemysł, rolnictwo — użytkownicy pomp HV.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "B", "firma": "Rotork Polska", "stoisko": "Hala D F7", "kat": "Producent z serwisem", "miasto": "Zabrze", "www": "https://www.rotork.com/", "coRobi": "Siłowniki i sterowanie przepływem; sieć serwisowa.", "teren": "Serwisanci siłowników na sieci / w zakładzie: diagnostyka, protokół.", "klienci": "Wodociągi, przemysł, infrastruktura krytyczna — armatura napędowa.", "skala": "Global", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Pan Studniarz", "stoisko": "Hala B C13", "kat": "Studnie / odwierty", "miasto": "Warszawa", "www": "https://panstudniarz.pl/", "coRobi": "Pan Studniarz Sp. z o.o. (Warszawa) — wiercenie studni głębinowych i depresyjnych, odwierty pod anody i pompy ciepła, montaż SUW.", "teren": "Wiertacze-instalatorzy: od dokumentacji przez odwiert po montaż studni / SUW.", "klienci": "Domy jednorodzinne, inwestorzy pomp ciepła, klienci potrzebujący ujęcia.", "skala": "Mikro", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Climatech", "stoisko": "Hala B C15", "kat": "Heating: montaż / serwis", "miasto": "Łomianki", "www": "https://www.climatech.pl/", "coRobi": "Climatech Przemysław Boniecki (JDG, Łomianki) — montaż, serwis i naprawy klimatyzacji, VRV i automatyki wentylacji od 2004.", "teren": "Serwisanci klimatyzacji: montaż, przeglądy, naprawy na obiektach klienta.", "klienci": "Domy, biura, obiekty komercyjne z klimatyzacją i VRV.", "skala": "Mikro", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "AMR (kotły na biomasę)", "stoisko": "Hala B C14", "kat": "Heating: montaż / serwis", "miasto": "Sierakowice", "www": "https://kotlownienabiomase.pl/", "coRobi": "AMR Remigiusz Rumiński (JDG, Pałubice k. Sierakowic) — importer Heizomat: sprzedaż, projekt, montaż i serwis kotłów na zrębki/trociny.", "teren": "Własna ekipa: dźwig, wstawienie kotła, uruchomienie, potem serwis na obiekcie.", "klienci": "Tartaki, hale, gospodarstwa — kotłownie B2B, nie typowy dom jednorodzinny.", "skala": "Mikro", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Ledox Serwis / Kelvintech", "stoisko": "Hala B D23", "kat": "Heating: montaż / serwis", "miasto": "Wilkowice", "www": "https://www.kelvintech.pl/", "coRobi": "Zespół serwisowy HVAC pod marką Kelvintech.", "teren": "Serwisanci HVAC: zgłoszenie → wyjazd → naprawa / przegląd → protokół.", "klienci": "Właściciele kotłów, pomp ciepła i instalacji grzewczych.", "skala": "Mikro", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Odwierty.eu", "stoisko": "Hala B B60", "kat": "Studnie / odwierty", "miasto": "Elbląg", "www": "https://odwierty.eu/", "coRobi": "Odwierty.eu S.A. (Elbląg) — wiercenie studni głębinowych i prace hydrauliczne.", "teren": "Wiertnia na działce: odwiert, zabudowa studni, hydraulika, papiery.", "klienci": "Domy, gospodarstwa, inwestorzy pomp ciepła i ujęć własnych.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Alaska Water", "stoisko": "Hala B D74 / Hala B D73", "kat": "Heating: montaż / serwis", "miasto": "Wólka Kozodawska", "www": "https://alaskawater.pl/", "coRobi": "Sprzedaż, montaż i serwis filtrów oraz uzdatniania wody.", "teren": "Instalatorzy i serwisanci montują filtry / stacje uzdatniania u klienta i wracają z protokołem.", "klienci": "Domy, lokale usługowe, małe firmy — użytkownicy filtrów kuchennych i stacji uzdatniania.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}, {"tier": "A", "firma": "Gejzer", "stoisko": "Hala B C60", "kat": "Heating: montaż / serwis", "miasto": "Leszkowy", "www": "https://gejzer.com/index.html", "coRobi": "Firma z korzeniami w montażu CO; dziś pompy i woda.", "teren": "Instalatorzy CO / pomp — montaż i serwis instalacji grzewczych u klienta.", "klienci": "Inwestorzy i użytkownicy instalacji CO oraz pomp ciepła / wody.", "skala": "SMB", "kolejka": 0, "why": "Oryginalna lista Piotra (D + Heating). Drugi rzut — tylko jeśli czas przed 14:30.", "opener": "", "kontakty": []}]};
+const DONE_KEY = "wodkan-piotr-done-2026";
+let storedTab = localStorage.getItem("wodkan-piotr-tab-v1");
+if (!storedTab || storedTab === "info") storedTab = "start";
+let tab = storedTab;
+let q = "";
+const done = JSON.parse(localStorage.getItem(DONE_KEY) || "{}");
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s || "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+}
+function fid(f) { return f.firma + "|" + f.stoisko; }
+function saveDone() { localStorage.setItem(DONE_KEY, JSON.stringify(done)); }
+function telLink(t) {
+  const n = String(t || "").replace(/\s+/g, "");
+  return n ? `<a href="tel:${esc(n)}">${esc(t)}</a>` : "";
+}
+function personName(c) {
+  return c.linkedin ? `<a href="${esc(c.linkedin)}">${esc(c.osoba)}</a>` : esc(c.osoba);
+}
+function priBadge(c) {
+  const label = c.pri === "must" ? "MUST" : (c.pri === "trafienie" ? "hit" : c.pri);
+  return `<span class="pri ${esc(c.pri)}">${esc(label)}</span>`;
+}
+function personCard(c) {
+  const tel = telLink(c.tel);
+  const mail = c.mail ? ` · <a href="mailto:${esc(c.mail)}">${esc(c.mail)}</a>` : "";
+  return `<div class="person">
+    <div class="who">${priBadge(c)} ${personName(c)}</div>
+    <div class="st">${esc(c.rola)} · ${esc(c.firma)} · ${esc(c.stoisko)}${tel ? " · " + tel : ""}${mail}</div>
+    <p>${esc(c.note)}</p>
+  </div>`;
+}
+function firmCard(f, open) {
+  const id = fid(f);
+  const isDone = !!done[id];
+  const badge = f.kolejka ? `#${f.kolejka}` : f.tier;
+  const ks = (f.kontakty || []).map(c => {
+    const tel = telLink(c.tel);
+    return `<div class="st">${priBadge(c)} ${personName(c)} · ${esc(c.rola)}
+      ${tel ? " · " + tel : ""} ${c.mail ? " · " + esc(c.mail) : ""}<br>${esc(c.note)}</div>`;
+  }).join("");
+  const name = f.www ? `<a href="${esc(f.www)}">${esc(f.firma)}</a>` : esc(f.firma);
+  const must = f.tier === "MUST" ? " must-card" : "";
+  return `<details class="firm${must} ${isDone ? "done" : ""}" data-id="${esc(id)}"${open ? " open" : ""}>
+    <summary class="head">
+      <span class="tick" data-tick="${esc(id)}"></span>
+      <div>
+        <h3><span class="pri ${esc(f.tier)}">${esc(badge)}</span> ${name}</h3>
+        <div class="st">${esc(f.stoisko)} · ${esc(f.skala)} · ${esc(f.kat)}${f.miasto ? " · " + esc(f.miasto) : ""}</div>
+      </div>
+    </summary>
+    <div class="body">
+      ${f.why ? `<p><strong>Dlaczego:</strong> ${esc(f.why)}</p>` : ""}
+      ${ks ? `<div class="ks">${ks}</div>` : ""}
+      <p><strong>Firma:</strong> ${esc(f.coRobi)}</p>
+      <p><strong>Teren:</strong> ${esc(f.teren)}</p>
+      <p><strong>Klienci:</strong> ${esc(f.klienci)}</p>
+      ${f.opener ? `<p><strong>Zahaczka:</strong> <span class="qq">„${esc(f.opener)}”</span></p>` : ""}
+    </div>
+  </details>`;
+}
+const MAPS = [
+  { id: "c", src: "maps/hala-c-wodkan.jpg", pdf: "maps/hala-c-wodkan.pdf", title: "Hala C · WOD-KAN", who: "Jutro + serwis", note: "EkoWodrol D63, potem E/F. Wejścia C8 (góra) i C16 (dół)." },
+  { id: "d", src: "maps/hala-d-recycling.jpg", pdf: "maps/hala-d-recycling.pdf", title: "Hala D · Recycling Tech", who: "Reszta · jeśli czas", note: "GSG, Tukany, PGS, Unimark. Wejścia D8 / D11." },
+  { id: "b", src: "maps/hala-b-heating.jpg", pdf: "maps/hala-b-heating.pdf", title: "Hala B · Heating / Pomp Ciepła", who: "Reszta · na końcu", note: "Pan Studniarz C13, Climatech C15, AMR C14." },
+];
+function mapCard(m) {
+  return `<div class="map-card">
+    <button type="button" class="map-open" data-map="${esc(m.src)}" data-title="${esc(m.title)}">
+      <img src="${esc(m.src)}" alt="${esc(m.title)}" />
+      <div class="st"><strong>${esc(m.title)}</strong> · ${esc(m.who)}<br>${esc(m.note)} · stuknij, żeby powiększyć</div>
+    </button>
+    <a class="map-dl" href="${esc(m.pdf)}" download>Pobierz PDF mapy</a>
+  </div>`;
+}
+function mapsBlock(ids, open) {
+  const items = MAPS.filter(m => ids.includes(m.id));
+  if (!items.length) return "";
+  return `<details class="hint"${open ? " open" : ""}>
+    <summary>Mapy hali</summary>
+    <div class="inner">${items.map(mapCard).join("")}</div>
+  </details>`;
+}
+function info() {
+  const route = DATA.jutro.map(f => {
+    const skip = f.tier === "SKIP" ? " — Adam: skip" : "";
+    return `<li><strong>#${esc(String(f.kolejka))} ${esc(f.firma)}</strong> · ${esc(f.stoisko)}${skip}</li>`;
+  }).join("");
+  return `<div class="install"><strong>Dodaj jak apkę na ekranie.</strong> W Safari: 3 kropki przy URL → Share (Udostępnij) → View more (Pokaż więcej) → Add to a home page (Dodaj do ekranu głównego). To nie jest apka Adama/Marka — nie mylić list.</div>
+  ${mapsBlock(["c","d","b"], true)}
+  <div class="box">
+    <h2>Gdy apka padnie</h2>
+    <p>Pobierz PDF (kolejka, ludzie, skrypt — bez map) i trzymaj w Plikach.</p>
+    <p><a class="map-dl" href="pdfs/piotr.pdf" download>Piotr D2.pdf</a></p>
+  </div>
+  <div class="cel">
+    <span class="lbl">MUST · EkoWodrol C D63</span>
+    <p>Pytaj o <strong>Artura Piekutowskiego</strong> — Adam: jutro ma być na stoisku, odpowiedzialny za serwis. Reszta Hali C to firmy, których Adam dziś nie zdążył.</p>
+  </div>
+  <div class="box">
+    <h2>Logistyka (Marek)</h2>
+    <p>Jedź na <strong>11:00</strong>. Wjazd 3, do końca, ostatni wjazd. Wyjście <strong>nie później niż 14:30</strong>.</p>
+    <p>Puste stoiska pierwsze. Oblegane — omijaj i wróć. Notatki dopiero po zejściu (puste krzesła albo Costa).</p>
+  </div>
+  <div class="box">
+    <h2>Lekcja Adama z D1</h2>
+    <p>Dużo firm to <strong>projekt + taczka + montaż i koniec</strong>, nie stały serwis. Pytaj wprost: <span class="qq">„Czy macie serwis?”</span> — nie tylko „czy macie ekipę”.</p>
+    <p>Duże firmy często już mają własne oprogramowanie. Małe — Excel. Nie sprzedajemy na hali.</p>
+  </div>
+  <div class="box">
+    <h2>Trasa Jutro · Hala C</h2>
+    <ol>${route}</ol>
+    <p><strong>Potem serwis (jeśli czas):</strong> Hawle D81 → KanRo E42 → EBARA E32 → DAB D111 → Ecol-Unicon F58 → ARNAP E75 → E+H F88.</p>
+    <p><strong>Reszta</strong> (D + Heating) tylko jeśli zostaje czas przed 14:30. Bolder i Lifton — Marek już rozmawiał, skip.</p>
+  </div>
+  <details class="hint" open>
+    <summary>Zahaczki · wybierz 1</summary>
+    <div class="inner">
+      <p><strong>Adam (start):</strong> <span class="qq">„Szukam firm, gdzie ekipa jedzie w teren do awarii / przeglądu i wraca z protokołem. U Was to serwis, czy raczej jednorazowy montaż na budowie?”</span></p>
+      <p><strong>EkoWodrol:</strong> <span class="qq">„Szukam Artura Piekutowskiego — słyszałem, że spinacie serwis.”</span></p>
+      <p><strong>30 sekund:</strong> <span class="qq">„Nie zabieram dłużej. Jedno pytanie: macie własne ekipy serwisowe, czy to idzie przez podwykonawców? … Dzięki. Wizytówka? Oddzwonimy po expo.”</span></p>
+    </div>
+  </details>
+  <details class="hint" open>
+    <summary>Lejek · 4 kroki</summary>
+    <div class="inner">
+      <p>1. <strong>Kwalifikacja.</strong> Własne brygady + czy to serwis, czy jednorazowy montaż. Brak serwisu → dziękujemy.</p>
+      <p>2. <strong>Ból w terenie.</strong> <span class="qq">„Co ekipie najbardziej utrudnia życie — dojazdy, przepisywanie na kolanie, czy brak info z bazy?”</span></p>
+      <p>3. <strong>Po powrocie.</strong> <span class="qq">„Jak zjadą na bazę — dużo czasu zżera wklepywanie do systemu / Excel / WhatsApp?”</span></p>
+      <p>4. <strong>Zamknięcie.</strong> <span class="qq">„Chcemy lepiej zrozumieć takie ekipy. 15 minut online po expo — pokażemy, jak to spinamy, bez sprzedaży na hali.”</span></p>
+    </div>
+  </details>
+  <details class="hint">
+    <summary>Czego NIE mówić</summary>
+    <div class="inner">
+      <p>AI, budżet, „jesteśmy software housem”, demo, cena, „mamy produkt dla Was”.</p>
+    </div>
+  </details>
+  <details class="hint">
+    <summary>Co MÓWIĆ, gdy zapytają</summary>
+    <div class="inner">
+      <p><strong>Jedno zdanie:</strong> <span class="qq">„ArdentCode — robimy software tam, gdzie ekipa jeździ w teren, a raport i tak wraca na Excel i telefon.”</span></p>
+      <p><strong>Jak dopytają:</strong> <span class="qq">„Nic nie sprzedajemy na hali. Po expo możemy pokazać, jak to spinamy u innych ekip terenowych.”</span></p>
+    </div>
+  </details>
+  <details class="hint">
+    <summary>Jeśli dopytają, co pokazujemy (głos → Excel)</summary>
+    <div class="inner">
+      <p>Ekipa nagrywa głos na obiekcie (zużycie, godziny, braki). Koordynator dostaje Excel — nie przepisuje czatu. Ekipa nie edytuje arkusza.</p>
+      <p>Ten sam cykl: teren + odprawa / dzień biurowy. Serwis, instalacje, inspekcje, montaż.</p>
+      <p>Zamknięcie: <span class="qq">„Po expo 15 minut — głos z obiektu, Excel u koordynatora.”</span></p>
+    </div>
+  </details>`;
+}
+function needle(blob) { return blob.toLowerCase().includes(q.trim().toLowerCase()); }
+function matchFirm(f) {
+  if (!q.trim()) return true;
+  const ks = (f.kontakty || []).map(c => `${c.osoba} ${c.rola} ${c.note}`).join(" ");
+  return needle(`${f.firma} ${f.stoisko} ${f.kat} ${f.coRobi} ${f.teren} ${f.klienci} ${f.why} ${f.opener} ${ks}`);
+}
+function matchPerson(c) {
+  if (!q.trim()) return true;
+  return needle(`${c.osoba} ${c.firma} ${c.stoisko} ${c.rola} ${c.note} ${c.tel} ${c.mail}`);
+}
+function render() {
+  document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  $("nav").dataset.who = tab;
+  $("chips").classList.add("hidden");
+  $("q").classList.toggle("hidden", tab === "start");
+  if (tab === "start") {
+    $("hdr").textContent = "· start";
+    $("main").innerHTML = info();
+    return;
+  }
+  if (tab === "jutro") {
+    $("hdr").textContent = "· kolejka C";
+    const firms = DATA.jutro.filter(matchFirm);
+    let html = mapsBlock(["c"], false);
+    html += `<div class="st" style="margin:0 0 10px">Kolejka Adama z D1. #1 MUST — Artur Piekutowski. Świat Instalacji na końcu.</div>`;
+    html += firms.map((f, i) => firmCard(f, i === 0 && !q.trim())).join("");
+    if (!firms.length) html += `<div class="empty">Nic nie pasuje do wyszukiwania.</div>`;
+    $("main").innerHTML = html;
+    return;
+  }
+  if (tab === "serwis") {
+    $("hdr").textContent = "· kierownicy";
+    const people = DATA.serwis.filter(matchPerson);
+    let html = mapsBlock(["c"], false);
+    html += `<div class="st" style="margin:0 0 10px">Hawle D81 → KanRo E42 → EBARA E32 → DAB D111 → Ecol F58 → ARNAP E75 → E+H F88. Bolder i Lifton — skip, Marek już był.</div>`;
+    html += people.map(personCard).join("");
+    if (!people.length) html += `<div class="empty">Nic nie pasuje do wyszukiwania.</div>`;
+    $("main").innerHTML = html;
+    return;
+  }
+  $("hdr").textContent = "· D + Heating";
+  const firms = DATA.reszta.filter(matchFirm);
+  const A = firms.filter(f => f.tier === "A");
+  const B = firms.filter(f => f.tier === "B");
+  let html = mapsBlock(["d","b"], false);
+  html += `<div class="st" style="margin:0 0 10px">Oryginalna lista Piotra. Tylko jeśli zostanie czas przed 14:30.</div>`;
+  if (A.length) {
+    html += `<h2>A — własne ekipy (${A.length})</h2>` + A.map(f => firmCard(f, false)).join("");
+  }
+  if (B.length) {
+    html += `<h2>B — producent z serwisem (${B.length})</h2>` + B.map(f => firmCard(f, false)).join("");
+  }
+  if (!firms.length) html += `<div class="empty">Nic nie pasuje do wyszukiwania.</div>`;
+  $("main").innerHTML = html;
+}
+$("q").addEventListener("input", e => { q = e.target.value; render(); });
+document.querySelector(".nav").addEventListener("click", e => {
+  const b = e.target.closest("[data-tab]");
+  if (!b) return;
+  tab = b.dataset.tab;
+  localStorage.setItem("wodkan-piotr-tab-v1", tab);
+  window.scrollTo(0, 0);
+  render();
+});
+let mapZoom = 2.2;
+function applyMapZoom() {
+  $("mapbox-img").style.width = (mapZoom * 100) + "%";
+}
+function openMap(src, title) {
+  $("mapbox-img").src = src;
+  $("mapbox-title").textContent = title;
+  mapZoom = 2.2;
+  applyMapZoom();
+  $("mapbox").classList.remove("hidden");
+  $("mapbox-scroller").scrollTop = 0;
+  $("mapbox-scroller").scrollLeft = 0;
+}
+$("main").addEventListener("click", e => {
+  const m = e.target.closest("[data-map]");
+  if (m) {
+    e.preventDefault();
+    openMap(m.dataset.map, m.dataset.title);
+    return;
+  }
+  const t = e.target.closest("[data-tick]");
+  if (!t) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const id = t.dataset.tick;
+  if (done[id]) delete done[id]; else done[id] = true;
+  saveDone();
+  const card = t.closest(".firm");
+  if (card) card.classList.toggle("done", !!done[id]);
+});
+$("mapbox-close").addEventListener("click", () => $("mapbox").classList.add("hidden"));
+$("mapbox-in").addEventListener("click", () => { mapZoom = Math.min(4, mapZoom + 0.5); applyMapZoom(); });
+$("mapbox-out").addEventListener("click", () => { mapZoom = Math.max(1, mapZoom - 0.5); applyMapZoom(); });
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+render();
+</script>
+</body>
+</html>
